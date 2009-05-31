@@ -19,7 +19,7 @@ class Engine:
         self.turn = turn
 
     def change_turn(self):
-        """Passes the turn to the other player."""
+        """Pass the turn to the other player."""
 
         if self.turn == "B":
             self.turn = "W"
@@ -104,12 +104,12 @@ class Engine:
         return len(this_turn) == len(next_turn) == 0
 
     def someone_winning(self):
-        """Returns a bool."""
+        """Return a bool."""
 
         return self.black_score != self.white_score
 
     def who_is_winning(self):
-        """Returns a string with the winning side. None if no one is winning."""
+        """Return a string with the winning side. None if no one is winning."""
 
         if self.someone_winning():
             if self.black_score > self.white_score:

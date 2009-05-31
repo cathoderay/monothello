@@ -15,9 +15,13 @@ class Application:
         self.window.wm_maxsize(width="400", height="400")
         self.window.wm_minsize(width="400", height="400")
 
-        self.create_elements()
-        self.game = False
 
+        self.game = False
+        self.show_valid_positions = False
+        self.human_human = True
+        self.color_first_player = "B"
+
+        self.create_elements()
         self.window.mainloop()
 
     def create_elements(self):
@@ -26,6 +30,7 @@ class Application:
         self.create_options()
 
     def create_menu(self):
+
         menu = Menu(self.window)
 
         game = Menu(menu, tearoff=0)
@@ -34,13 +39,34 @@ class Application:
         menu.add_cascade(label="Game", menu=game, underline=0)
 
         settings = Menu(menu, tearoff=0)
-        self.show_valid_positions = False
         settings.add_checkbutton(label="Show valid positions", 
-                                 variable=self.show_valid_positions, 
                                  command=self.toggle_show_valid_positions,
                                  underline=0)
-        menu.add_cascade(label="Settings", menu=settings, underline=0)
 
+        first_player = Menu(settings, tearoff=0)
+        first_player.add_radiobutton(label="Black",
+                                     variable=self.color_first_player,
+                                     command=lambda color="B": self.set_first_player(color),
+                                     underline=0)
+
+        first_player.add_radiobutton(label="White",
+                                     variable=self.color_first_player,
+                                     command=lambda color="W": self.set_first_player(color),
+                                     underline=0)
+        settings.add_cascade(label="First Player", menu=first_player, underline=0)        
+
+        mode = Menu(settings, tearoff=0)
+        mode.add_radiobutton(label="Human vs Human",
+                             variable=self.human_human,
+                             command=self.toggle_mode,
+                             underline=0)
+        mode.add_radiobutton(label="Human vs Computer",
+                             variable=self.human_human,
+                             command=self.toggle_mode,
+                             underline=9)
+        settings.add_cascade(label="Mode", menu=mode, underline=0)
+
+        menu.add_cascade(label="Settings", menu=settings, underline=0)
 
         help = Menu(menu, tearoff=0)
         help.add_command(label="About", command=self.show_credits, underline=0)
@@ -67,8 +93,10 @@ class Application:
                 self.board.update( {(row, column): button} )
 
     def create_options(self):
-        pass_turn = Button(self.window, text="Pass", command=self.pass_turn)
-        pass_turn.pack(side=RIGHT)
+        self.pass_turn = Button(self.window, text="Pass", 
+                                state=DISABLED,
+                                command=self.pass_turn)
+        self.pass_turn.pack(side=RIGHT)
         self.status = Label(self.window)
         self.update_status("Welcome to MonOthello!")
         self.status.pack(side=LEFT)
@@ -78,8 +106,7 @@ class Application:
         if self.game and \
            not tkMessageBox.askyesno(title="New", message=message):
                 return
-
-        self.game = Engine()
+        self.game = Engine(turn=self.color_first_player)
         self.update_board()
         message = "Let's play! Now it's the %s's turn." % self.game.turn
         self.update_status(message)
@@ -88,6 +115,12 @@ class Application:
         self.show_valid_positions = not self.show_valid_positions           
         if self.game:
             self.update_board()
+
+    def toggle_mode(self):
+        self.human_human = not self.human_human
+
+    def set_first_player(self, color):
+        self.color_first_player = color
 
     def pass_turn(self):
         if not self.game:
@@ -104,6 +137,14 @@ class Application:
     def bye(self):
         if tkMessageBox.askyesno(title="Quit", message="Really quit?"):
             quit()
+
+    def update_score(self):
+        self.score["text"] = "Black: %s | White: %s" % \
+                             (self.game.black_score, 
+                              self.game.white_score)
+
+    def update_status(self, message):
+        self.status["text"] = message
 
     def play(self, position):
         """Move a piece to the given position."""
@@ -141,19 +182,16 @@ class Application:
                 else:
                     position["bg"] = "brown"
 
+        valid_positions = self.game.find_valid_positions()
+        self.pass_turn["state"] = DISABLED
+        if len(valid_positions) == 0:
+            self.pass_turn["state"] = NORMAL
+
         if self.show_valid_positions:
             valid_positions = self.game.find_valid_positions()
             for position in valid_positions:
                 self.board[position]["bg"] = "green"
         self.update_score()
-
-    def update_score(self):
-        self.score["text"] = "Black: %s | White: %s" % \
-                             (self.game.black_score, 
-                              self.game.white_score)
-
-    def update_status(self, message):
-        self.status["text"] = message
 
 
 if __name__ == "__main__":
