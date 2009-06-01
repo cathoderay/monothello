@@ -1,5 +1,8 @@
+import time
+
 from Tkinter import *
 import tkMessageBox
+
 from engine import Engine
 
 
@@ -15,10 +18,10 @@ class Application:
         self.window.wm_maxsize(width="400", height="400")
         self.window.wm_minsize(width="400", height="400")
 
-
         self.game = False
         self.show_valid_positions = False
-        self.human_human = True
+        self.difficulty = 0        
+        self.mode = False
         self.color_first_player = "B"
 
         self.create_elements()
@@ -56,14 +59,21 @@ class Application:
 
         mode = Menu(settings, tearoff=0)
         mode.add_radiobutton(label="Human vs Human",
-                             variable=self.human_human,
+                             variable=self.mode,
                              command=lambda v=True: self.set_mode(v),
                              underline=0)
         mode.add_radiobutton(label="Human vs Computer",
-                             variable=self.human_human,
+                             variable=self.mode,
                              command=lambda v=False: self.set_mode(v),
                              underline=9)
         settings.add_cascade(label="Mode", menu=mode, underline=0)
+
+        difficulty = Menu(settings, tearoff=0)
+        difficulty.add_radiobutton(label="Baby",
+                                   variable=self.difficulty,
+                                   command=lambda depth=0: self.set_difficulty(depth),
+                                   underline=0)
+        settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
 
         menu.add_cascade(label="Settings", menu=settings, underline=0)
 
@@ -117,10 +127,13 @@ class Application:
             self.update_board()
 
     def set_mode(self, value):
-        self.human_human = value
+        self.mode = value
 
     def set_first_player(self, color):
         self.color_first_player = color
+
+    def set_difficulty(self, v):
+        self.difficulty = v
 
     def pass_turn(self):
         """Pass the turn when it's not possible to play."""
@@ -168,6 +181,26 @@ class Application:
             else:
                 message = "%s's turn." % self.game.turn      
                 self.update_status(message)
+
+        if self.game and not self.mode and not self.game.check_end() and \
+           self.game.turn != self.color_first_player:
+            self.disable_pieces()
+            self.play_machine()
+
+    def disable_pieces(self):
+        for i in range(8):
+            for j in range(8):
+                position = self.board[(i, j)]
+                position["state"] = DISABLED
+
+    def play_machine(self):
+        position = self.game.choose_position(self.difficulty)
+        if position == None:
+            self.game.change_turn()
+            self.update_board()
+        if position:
+            self.play(position)          
+
 
     def update_board(self):
         """Update the pieces from the engine's board."""

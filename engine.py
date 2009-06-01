@@ -1,3 +1,6 @@
+import random
+
+
 class Engine:
     def __init__(self, turn="B"):
         """Put the pieces on the board, set the turn, 
@@ -70,6 +73,17 @@ class Engine:
             return True
         return False
 
+    def choose_position(self, depth):
+        """Machine choose a position to play. 
+        Depth higher leads to a better playing.
+
+        """
+        valid_positions = self.find_valid_positions()
+        if len(valid_positions) == 0:
+            return None
+        if depth == 0:
+             return random.choice(valid_positions)
+            
     def find_valid_positions(self):
         """Return a list of valid positions."""
         valid_positions = list()
