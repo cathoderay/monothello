@@ -30,7 +30,6 @@ class Application:
         self.create_options()
 
     def create_menu(self):
-
         menu = Menu(self.window)
 
         game = Menu(menu, tearoff=0)
@@ -102,6 +101,7 @@ class Application:
         self.status.pack(side=LEFT)
 
     def create_game(self):
+        """Instantiate a game from the engine module."""
         message="Are you sure you want to restart?"
         if self.game and \
            not tkMessageBox.askyesno(title="New", message=message):
@@ -123,6 +123,7 @@ class Application:
         self.color_first_player = color
 
     def pass_turn(self):
+        """Pass the turn when it's not possible to play."""
         if not self.game:
             return
         self.game.change_turn()
@@ -169,6 +170,7 @@ class Application:
                 self.update_status(message)
 
     def update_board(self):
+        """Update the pieces from the engine's board."""
         for row in range(8):
             for column in range(8):
                 position = self.board[(row, column)]
