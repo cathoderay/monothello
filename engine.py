@@ -4,7 +4,6 @@ class Engine:
         scores and the directions to check valid positions.
 
         """
-
         self.board = dict()
         for row in range(8):
             for column in range(8):
@@ -20,7 +19,6 @@ class Engine:
 
     def change_turn(self):
         """Pass the turn to the other player."""
-
         if self.turn == "B":
             self.turn = "W"
         else:
@@ -31,7 +29,6 @@ class Engine:
         If play is False, just checks if the position is valid.
 
         """
-
         to_change = list()
         any_valid_position = False
         for direction in self.directions:
@@ -75,7 +72,6 @@ class Engine:
 
     def find_valid_positions(self):
         """Return a list of valid positions."""
-
         valid_positions = list()
         for i in range(8):
             for j in range(8):
@@ -85,7 +81,6 @@ class Engine:
 
     def calculate_score(self):
         """Update the player's score."""
-
         self.black_score = self.white_score = 0
         for i in range(8):
             for j in range(8):
@@ -96,7 +91,6 @@ class Engine:
 
     def check_end(self):
         """Return a bool."""
-
         this_turn = self.find_valid_positions()
         self.change_turn()
         next_turn = self.find_valid_positions()
@@ -105,12 +99,10 @@ class Engine:
 
     def someone_winning(self):
         """Return a bool."""
-
         return self.black_score != self.white_score
 
     def who_is_winning(self):
         """Return a string with the winning side. None if no one is winning."""
-
         if self.someone_winning():
             if self.black_score > self.white_score:
                 return "Black"

@@ -58,11 +58,11 @@ class Application:
         mode = Menu(settings, tearoff=0)
         mode.add_radiobutton(label="Human vs Human",
                              variable=self.human_human,
-                             command=self.toggle_mode,
+                             command=lambda v=True: self.set_mode(v),
                              underline=0)
         mode.add_radiobutton(label="Human vs Computer",
                              variable=self.human_human,
-                             command=self.toggle_mode,
+                             command=lambda v=False: self.set_mode(v),
                              underline=9)
         settings.add_cascade(label="Mode", menu=mode, underline=0)
 
@@ -116,8 +116,8 @@ class Application:
         if self.game:
             self.update_board()
 
-    def toggle_mode(self):
-        self.human_human = not self.human_human
+    def set_mode(self, value):
+        self.human_human = value
 
     def set_first_player(self, color):
         self.color_first_player = color
