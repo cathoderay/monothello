@@ -21,7 +21,7 @@ class Application:
         self.game = False
         self.show_valid_positions = False
         self.difficulty = 0        
-        self.mode = False
+        self.mode = 1
         self.color_first_player = "B"
 
         self.create_elements()
@@ -60,11 +60,15 @@ class Application:
         mode = Menu(settings, tearoff=0)
         mode.add_radiobutton(label="Human vs Human",
                              variable=self.mode,
-                             command=lambda v=True: self.set_mode(v),
+                             command=lambda v=0: self.set_mode(v),
                              underline=0)
         mode.add_radiobutton(label="Human vs Computer",
                              variable=self.mode,
-                             command=lambda v=False: self.set_mode(v),
+                             command=lambda v=1: self.set_mode(v),
+                             underline=1)
+        mode.add_radiobutton(label="Computer vs Human",
+                             variable=self.mode,
+                             command=lambda v=2: self.set_mode(v),
                              underline=9)
         settings.add_cascade(label="Mode", menu=mode, underline=0)
 
@@ -117,6 +121,9 @@ class Application:
            not tkMessageBox.askyesno(title="New", message=message):
                 return
         self.game = Engine(turn=self.color_first_player)
+        if self.mode == 2:
+            self.disable_pieces()
+            self.play_machine()
         self.update_board()
         message = "Let's play! Now it's the %s's turn." % self.game.turn
         self.update_status(message)
@@ -173,17 +180,18 @@ class Application:
             if self.game.check_end():
                 message = "End of game. "
                 if self.game.someone_winning():
-                    message += self.game.who_is_winning() + " win!" 
+                    message += self.game.who_is_winning() + " win!"
                 else:
                     message += "Tie."
                 tkMessageBox.showinfo(title="End of game", message=message)
                 self.game = False
             else:
-                message = "%s's turn." % self.game.turn      
+                message = "%s's turn." % self.game.turn
                 self.update_status(message)
 
-        if self.game and not self.mode and not self.game.check_end() and \
-           self.game.turn != self.color_first_player:
+        if self.game and ((self.mode == 1 and self.game.turn != self.color_first_player) or \
+           (self.mode == 2 and self.game.turn == self.color_first_player)):
+            self.game.turn != self.color_first_player
             self.disable_pieces()
             self.play_machine()
 
