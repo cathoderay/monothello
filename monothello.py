@@ -15,14 +15,19 @@ class Application:
 
         self.window = Tk()
         self.window.title("MonOthello")
-        self.window.wm_maxsize(width="400", height="400")
-        self.window.wm_minsize(width="400", height="400")
+        self.window.wm_maxsize(width="460", height="520")
+        self.window.wm_minsize(width="460", height="520")
 
         self.game = False
         self.show_valid_positions = False
         self.difficulty = 0        
         self.mode = 1
         self.color_first_player = "B"
+        self.white_image = PhotoImage(file="white.gif")
+        self.black_image = PhotoImage(file="black.gif")
+        self.empty_image = PhotoImage(file="empty.gif")
+        self.valid_image = PhotoImage(file="valid.gif")
+
 
         self.create_elements()
         self.window.mainloop()
@@ -102,7 +107,7 @@ class Application:
                                 state=DISABLED,
                                 command=lambda position=(row, column): self.play(position))
                 button["bg"] = "gray"
-                button.pack(side=LEFT, fill=BOTH, expand=1)
+                button.pack(side=LEFT, fill=BOTH, expand=1, padx=0, pady=0)
                 self.board.update( {(row, column): button} )
 
     def create_options(self):
@@ -217,13 +222,16 @@ class Application:
                 position = self.board[(row, column)]
                 position["state"] = NORMAL
                 if self.game.board[(row, column)] == "W":
-                    position["bg"] = "white"
-                    position["state"] = DISABLED
+                    #position["bg"] = "white"
+                    position["image"] = self.white_image
+                    #position["state"] = DISABLED
                 elif self.game.board[(row, column)] == "B":
-                    position["bg"] = "black"
-                    position["state"] = DISABLED
+                    #position["bg"] = "black"
+                    position["image"] = self.black_image
+                    #position["state"] = DISABLED
                 else:
-                    position["bg"] = "brown"
+                    position["image"] = self.empty_image
+                    #position["bg"] = "brown"
 
         valid_positions = self.game.find_valid_positions()
         self.pass_turn["state"] = DISABLED
@@ -233,7 +241,8 @@ class Application:
         if self.show_valid_positions:
             valid_positions = self.game.find_valid_positions()
             for position in valid_positions:
-                self.board[position]["bg"] = "green"
+                #self.board[position]["bg"] = "green"
+                self.board[position]["image"] = self.valid_image
         self.update_score()
 
 
