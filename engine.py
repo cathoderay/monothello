@@ -32,6 +32,8 @@ class Engine:
         If play is False, just checks if the position is valid.
 
         """
+        if self.board[position] != "E":
+            return False
         to_change = list()
         any_valid_position = False
         for direction in self.directions:
