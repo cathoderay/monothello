@@ -1,128 +1,173 @@
-import random
+class Game():
+    def __init__(self, p1_color="W", p1_mode="H", p2_mode="C", difficulty=0):
+        if p1_color == "W":
+            p2_color = "B"
+        else:
+            p2_color = "W"
+        self.board = Board()
+        self.player1 = Player(color=p1_color, mode=p1_mode)
+        self.player2 = Player(color=p2_color, mode=p2_mode)
+        self.turn = self.player1
 
-
-class Engine:
-    def __init__(self, turn="B"):
-        """Put the pieces on the board, set the turn, 
-        scores and the directions to check valid positions.
-
-        """
-        self.board = dict()
-        for row in range(8):
-            for column in range(8):
-                self.board[(row, column)] = "E"
+    def start(self):
+        """Put the initial pieces on the board."""
         self.board[(3, 3)] = self.board[(4, 4)] = "B"
         self.board[(3, 4)] = self.board[(4, 3)] = "W"
-
-        self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1), 
-                           (1, 1), (-1, -1), (1, -1), (-1, 1)]
-  
-        self.black_score = self.white_score = 2
-        self.turn = turn
-
+        self.update_scores()
+    
+    def play(self, position):
+        if self.board.is_valid_position(position, self.turn.color):
+            self.board.move(position, self.turn.color)
+            self.update_scores()
+            self.change_turn()
+            return True
+        else:
+            return False
+    
+    def update_scores(self):
+        """Update the scores of the players."""
+        self.player1.score = self.board.count_pieces(self.player1.color)
+        self.player2.score = self.board.count_pieces(self.player2.color)
+    
     def change_turn(self):
         """Pass the turn to the other player."""
-        if self.turn == "B":
-            self.turn = "W"
+        if self.turn ==	self.player1:
+            self.turn = self.player2
         else:
-            self.turn = "B"
+            self.turn = self.player1
 
-    def move(self, position, play):
-        """If play is True, moves to that position. 
-        If play is False, just checks if the position is valid.
+    def test_end(self):
+        """Return a bool.
+        Check the end of the game.
 
         """
-        if self.board[position] != "E":
-            return False
-        to_change = list()
-        any_valid_position = False
+        return not self.board.has_valid_position("W") and not \
+           self.board.has_valid_position("B")
+
+    def __str__(self):
+        string = "----------------------\n"
+        string += "GAME\n"
+        string += "-------\n"
+        string += "Turn: %s\n" % self.turn.color
+        string += "-------\n"
+        string += self.player1.__str__()
+        string += "-------\n"
+        string += self.player2.__str__()
+        string += "-------\n"
+        string += "Board:\n"
+        string += self.board.__str__()
+        string += "----------------------\n"
+        return string
+
+
+class Player():
+    def __init__(self, color, mode):
+        self.color = color
+        self.mode = mode
+        self.score = 0
+
+    def __str__(self):
+        string = "Player:\n"
+        string += "Color: %s\n" % self.color
+        string += "Mode: %s\n" % self.mode
+        string += "Score: %s\n" % self.score
+        return string
+
+
+class Board(dict):
+    def __init__(self):
+        self.directions = [(1, 0), (0, 1), (-1, 0), (0, -1), 
+                           (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        for i in range(8):
+            for j in range(8):
+                self[(i, j)] = "E"
+
+    def count_pieces(self, color):
+        """Count the pieces in the board of the given color."""
+        sum = 0
+        for i in range(8):
+            for j in range(8):
+                if self[(i, j)] == color:
+                    sum += 1
+        return sum
+
+    def has_valid_position(self, turn):
+        """Return if the turn has any valid position."""
+        for i in range(8):
+            for j in range(8):
+                position = (i, j)
+                if self.is_valid_position(position, turn):
+                    return True
+        return False
+
+    def valid_positions(self, turn):
+        """Return a set with all valid positions for the given turn."""
+        valid = list()
+        for i in range(8):
+            for j in range(8):
+                position = (i, j)
+                if self.is_valid_position(position, turn):
+                    valid.append(position)
+        return set(valid)
+
+    def is_valid_position(self, position, turn):
+        """Return a bool.
+        Check if the given position is valid for this turn.
+        
+        """
+        if self[position] != "E": return False
         for direction in self.directions:
-            i, j = position
             between = 0
-                
+            i, j = position
             while True:
-                if (direction[0] == 1 and i == 7) or (direction[0] == -1 and i == 0) or \
-                   (direction[1] == 1 and j == 7) or (direction[1] == -1 and j == 0):
-                    break
-                
-                i += direction[0]
-                j += direction[1]
-
-                if self.board[(i, j)] == "E":
-                    break
-
-                if self.turn != self.board[(i, j)]:
-                    between += 1
-                else:
-                    if between == 0:
+                try:
+                    i += direction[0]
+                    j += direction[1]
+                    if self[(i, j)] == "E":
                         break
+                    if self[(i, j)] != turn:
+                        between += 1
+                    elif between > 0:
+                        return True
                     else:
-                        if not play:
-                            return True
-                        any_valid_position = True
-                        x, y = position
+                        break                    
+                except KeyError:
+                    break
+        return False
+
+    def move(self, position, turn):
+        """Move to the given position a piece of the color of the turn."""
+        to_change = []
+        for direction in self.directions:
+            between = 0
+            i, j = position
+            while True:
+                try:
+                    i += direction[0]
+                    j += direction[1]
+                    if self[(i, j)] == "E":
+                        break
+                    if self[(i, j)] != turn:
+                        between += 1
+                    elif between > 0:
+                        x, y = position                        
                         for times in range(between+1):
                             to_change.append((x, y))
                             x += direction[0]
                             y += direction[1]
                         break
+                    else:
+                        break
+                except KeyError:
+                    break
+        for item in to_change:
+            self[item] = turn
 
-        if play and any_valid_position:
-            for item in to_change:
-                self.board[item] = self.turn
-            self.calculate_score()
-            self.change_turn()
-            return True
-        return False
-
-    def choose_position(self, depth):
-        """Machine choose a position to play. 
-        Depth higher leads to a better playing.
-
-        """
-        valid_positions = self.find_valid_positions()
-        if len(valid_positions) == 0:
-            return None
-        if depth == 0:
-             return random.choice(valid_positions)
-            
-    def find_valid_positions(self):
-        """Return a list of valid positions."""
-        valid_positions = list()
+    def __str__(self):
+        string = ''
         for i in range(8):
+            a = ''
             for j in range(8):
-                if self.board[(i, j)] == "E" and self.move((i, j), False):
-                    valid_positions.append((i, j))
-        return valid_positions
-
-    def calculate_score(self):
-        """Update the player's score."""
-        self.black_score = self.white_score = 0
-        for i in range(8):
-            for j in range(8):
-                if self.board[(i, j)] == "W":
-                    self.white_score += 1
-                if self.board[(i, j)] == "B":
-                    self.black_score += 1
-
-    def check_end(self):
-        """Return a bool."""
-        this_turn = self.find_valid_positions()
-        self.change_turn()
-        next_turn = self.find_valid_positions()
-        self.change_turn()
-        return len(this_turn) == len(next_turn) == 0
-
-    def someone_winning(self):
-        """Return a bool."""
-        return self.black_score != self.white_score
-
-    def who_is_winning(self):
-        """Return a string with the winning side. None if no one is winning."""
-        if self.someone_winning():
-            if self.black_score > self.white_score:
-                return "Black"
-            else:
-                return "White"           
-        return None
-
+                a += self[(i, j)]
+            string += a + '\n'
+        return string

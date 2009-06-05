@@ -3,7 +3,8 @@ import time
 from Tkinter import *
 import tkMessageBox
 
-from engine import Engine
+from engine import *
+from minimax import *
 
 
 class Application:
@@ -20,14 +21,13 @@ class Application:
 
         self.game = False
         self.show_valid_positions = False
-        self.difficulty = 0        
+        self.difficulty = 0
         self.mode = 1
         self.color_first_player = "B"
         self.white_image = PhotoImage(file="white.gif")
         self.black_image = PhotoImage(file="black.gif")
         self.empty_image = PhotoImage(file="empty.gif")
         self.valid_image = PhotoImage(file="valid.gif")
-
 
         self.create_elements()
         self.window.mainloop()
@@ -105,7 +105,7 @@ class Application:
             for column in range(8):
                 button = Button(frame,
                                 state=DISABLED,
-                                command=lambda position=(row, column): self.play(position))
+                                command=lambda position=(row, column): self.go(position))
                 button["bg"] = "gray"
                 button.pack(side=LEFT, fill=BOTH, expand=1, padx=0, pady=0)
                 self.board.update( {(row, column): button} )
@@ -125,13 +125,24 @@ class Application:
         if self.game and \
            not tkMessageBox.askyesno(title="New", message=message):
                 return
-        self.game = Engine(turn=self.color_first_player)
+        if self.mode == 0:
+            p1_mode = p2_mode = "H"
+        elif self.mode == 1:
+            p1_mode = "H"
+            p2_mode = "C"
+        else:
+            p1_mode = "C"
+            p2_mode = "H"
+        self.game = Game(p1_color=self.color_first_player,
+                         p1_mode=p1_mode, p2_mode=p2_mode,
+                         difficulty=self.difficulty)
+        self.game.start()
         if self.mode == 2:
-            self.disable_pieces()
-            self.play_machine()
+            self.computer_play()
         self.update_board()
-        message = "Let's play! Now it's the %s's turn." % self.game.turn
+        message = "Let's play! Now it's the %s's turn." % self.game.turn.color
         self.update_status(message)
+        print self.game
 
     def toggle_show_valid_positions(self):
         self.show_valid_positions = not self.show_valid_positions           
@@ -152,8 +163,9 @@ class Application:
         if not self.game:
             return
         self.game.change_turn()
-        self.update_board()
-        message = "%s's turn." % self.game.turn
+        if self.game.turn.mode == "C":
+            self.computer_play()
+        message = "%s's turn." % self.game.turn.color
         self.update_status(message)
 
     def show_credits(self):
@@ -165,55 +177,86 @@ class Application:
             quit()
 
     def update_score(self):
-        self.score["text"] = "Black: %s | White: %s" % \
-                             (self.game.black_score, 
-                              self.game.white_score)
+        self.score["text"] = "%s: %s | %s: %s" % \
+                             (self.game.player1.color, 
+                              self.game.player1.score, 
+                              self.game.player2.color, 
+                              self.game.player2.score)
 
     def update_status(self, message):
         self.status["text"] = message
 
-    def play(self, position):
-        """Move a piece to the given position."""
-
+    def go(self, position):
         if not self.game:
             return
-        if not self.game.move(position, True):
-            message = "Wrong move. %s's turn." % self.game.turn
-            self.update_status(message)
+        if self.game.turn.mode == "C":
+            message = "It's the computer turn. Please, wait a moment."
+            self.update_status(message=message)
         else:
-            self.update_board()
-            if self.game.check_end():
-                message = "End of game. "
-                if self.game.someone_winning():
-                    message += self.game.who_is_winning() + " win!"
-                else:
-                    message += "Tie."
-                tkMessageBox.showinfo(title="End of game", message=message)
-                self.game = False
-            else:
-                message = "%s's turn." % self.game.turn
-                self.update_status(message)
+            self.play(position)
 
-        if self.game and ((self.mode == 1 and self.game.turn != self.color_first_player) or \
-           (self.mode == 2 and self.game.turn == self.color_first_player)):
-            self.game.turn != self.color_first_player
-            self.disable_pieces()
-            self.play_machine()
+    def play(self, position):
+        """Move a piece to the given position."""
+        if self.game:
+            if not self.game.play(position):
+                message = "Invalid move. It's %s's turn." % self.game.turn.color
+                self.update_status(message)
+                return
+            print self.game
+            message = "%s's turn." % (self.game.turn.color)
+            self.update_status(message)
+            self.update_board()          
+            self.check_next_turn()
+
+    def computer_play(self):
+        if self.difficulty == 0:
+            position = ingenuos(self.game.board, self.game.turn.color)
+            self.game.play(position)
+        print self.game
+        self.update_board()
+        self.check_next_turn()
+
+    def check_next_turn(self):
+        if self.game.test_end():
+            self.show_end()
+            self.game = False
+            self.pass_turn["state"] = DISABLED
+            return
+        if self.game.turn.mode == "C":
+            if not self.game.board.has_valid_position(self.game.turn.color):
+                self.game.change_turn()
+                message = "Computer Passed. Now it's %s's turn." % \
+                          (self.game.turn.color)
+                self.update_status(message)
+                self.update_board()
+            else:
+                #computer always has a movement to do
+                self.computer_play()
+                try:
+                    message = "%s's turn." % (self.game.turn.color)
+                    self.update_status(message)
+                    self.update_board()
+                except:
+                    pass
+        else:
+            if not self.game.board.has_valid_position(self.game.turn.color):
+                message = "%s must pass." % (self.game.turn.color)
+                self.update_status(message)
+                self.update_board()
+            else:
+                message = "%s's turn." % (self.game.turn.color)
+                self.update_status(message)
+                self.update_board()
+
+    def show_end(self):
+        message = "End of game."
+        tkMessageBox.showinfo(title="End", message=message)
 
     def disable_pieces(self):
         for i in range(8):
             for j in range(8):
                 position = self.board[(i, j)]
                 position["state"] = DISABLED
-
-    def play_machine(self):
-        position = self.game.choose_position(self.difficulty)
-        if position == None:
-            self.game.change_turn()
-            self.update_board()
-        if position:
-            self.play(position)          
-
 
     def update_board(self):
         """Update the pieces from the engine's board."""
@@ -222,26 +265,19 @@ class Application:
                 position = self.board[(row, column)]
                 position["state"] = NORMAL
                 if self.game.board[(row, column)] == "W":
-                    #position["bg"] = "white"
                     position["image"] = self.white_image
-                    #position["state"] = DISABLED
                 elif self.game.board[(row, column)] == "B":
-                    #position["bg"] = "black"
                     position["image"] = self.black_image
-                    #position["state"] = DISABLED
                 else:
                     position["image"] = self.empty_image
-                    #position["bg"] = "brown"
 
-        valid_positions = self.game.find_valid_positions()
+
         self.pass_turn["state"] = DISABLED
-        if len(valid_positions) == 0:
+        if not self.game.board.has_valid_position(self.game.turn.color):
             self.pass_turn["state"] = NORMAL
-
-        if self.show_valid_positions:
-            valid_positions = self.game.find_valid_positions()
+        elif self.show_valid_positions:
+            valid_positions = self.game.board.valid_positions(self.game.turn.color)
             for position in valid_positions:
-                #self.board[position]["bg"] = "green"
                 self.board[position]["image"] = self.valid_image
         self.update_score()
 
