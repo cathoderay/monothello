@@ -11,14 +11,14 @@ def ingenuos(board, turn):
     return random.choice(list(valid_positions(board, turn)))
 
 
-def heuristic1(board, turn):
-    if turn == "W":
+def heuristic1(board):
+    if PLAYER == "W":
         return count_pieces(board, "W") - count_pieces(board, "B")
     else:
         return count_pieces(board, "B") - count_pieces(board, "W")        
 
 
-def heuristic2(board, turn):
+def heuristic2(board):
     value = 0
     for i in range(8):
         for j in range(8):
@@ -46,7 +46,7 @@ def heuristic2(board, turn):
 
 def minimax(board, depth, turn, heuristic=heuristic2):
     if depth == 0 or end_game(board):
-        return (heuristic1(board, PLAYER), None)
+        return (heuristic1(board), None)
     else:
         valid = valid_positions(board, turn)
         movement = None
