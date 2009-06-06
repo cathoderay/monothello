@@ -39,6 +39,8 @@ class Application:
         self.black_image = PhotoImage(file="black.gif")
         self.empty_image = PhotoImage(file="empty.gif")
         self.valid_image = PhotoImage(file="valid.gif")       
+        self.black_took_image = PhotoImage(file="black_took.gif")
+        self.white_took_image = PhotoImage(file="white_took.gif")
 
     def create_menu(self):
         self.menu = Menu(self.window)
@@ -150,10 +152,11 @@ class Application:
         self.game.start()
         if self.mode == 2:
             self.computer_play()
-        self.update_board()
         message = "Let's play! Now it's the %s's turn." % self.game.turn.color
         self.update_status(message)
-        print self.game
+        self.update_board()
+        self.update_score()
+        self.update_pass_turn()
 
     def toggle_show_valid_positions(self):
         self.show_valid_positions = not self.show_valid_positions           
@@ -184,15 +187,6 @@ class Application:
         message = "MonOthello\nv.: 1.0"
         tkMessageBox.showinfo(title="About", message=message)
 
-    def update_score(self):
-        self.score["text"] = "%s(%s): %s | %s(%s): %s" % \
-                             (self.game.player1.color,
-                              self.game.player1.mode, 
-                              self.game.player1.score, 
-                              self.game.player2.color,
-                              self.game.player2.mode, 
-                              self.game.player2.score)
-
     def go(self, position):
         if not self.game:
             return
@@ -212,6 +206,8 @@ class Application:
             message = "%s's turn." % (self.game.turn.color)
             self.update_status(message)
             self.update_board()
+            self.update_score()
+            self.update_pass_turn()
             self.check_next_turn()
 
     def computer_play(self):            
@@ -225,14 +221,17 @@ class Application:
         message = "%s's turn." % (self.game.turn.color)        
         self.update_status(message)
         self.update_board()
+        self.update_score()
+        self.update_pass_turn()
         self.check_next_turn()       
 
     def check_next_turn(self):
         if self.game.test_end():
             self.update_status("End of game.")
             self.update_board()
+            self.update_score()
+            self.update_pass_turn()
             self.show_end()
-            self.pass_turn["state"] = DISABLED
             self.game = False
             return
         if self.game.turn.mode == "C":
@@ -242,15 +241,16 @@ class Application:
                           (self.game.turn.color)
                 self.update_status(message)
                 self.update_board()
+                self.update_pass_turn()
                 return
             else:
                 #computer always has a movement to do
                 self.update_status("Computer is 'thinking'. Please, wait a moment...")
-                self.update_board()            
+                self.update_board()
                 self.computer_play()
 
     def show_end(self):
-        message = "End of game."
+        message = "End of game. %s" % self.game.winning_side()
         tkMessageBox.showinfo(title="End", message=message)
 
     def update_status(self, message):
@@ -265,20 +265,36 @@ class Application:
                 position["state"] = NORMAL
                 if self.game.board[(row, column)] == "W":
                     position["image"] = self.white_image
+                    position.update_idletasks()
                 elif self.game.board[(row, column)] == "B":
                     position["image"] = self.black_image
+                    position.update_idletasks()
                 else:
                     position["image"] = self.empty_image
+                    position.update_idletasks()
+        if self.show_valid_positions:
+            valid = list(valid_positions(self.game.board, self.game.turn.color))
+            for position in valid:
+                p = self.board[position]
+                p["image"] = self.valid_image
+                p.update_idletasks()
+                
 
+    def update_score(self):
+        self.score["text"] = "%s(%s): %s | %s(%s): %s" % \
+                             (self.game.player1.color,
+                              self.game.player1.mode, 
+                              self.game.player1.score, 
+                              self.game.player2.color,
+                              self.game.player2.mode, 
+                              self.game.player2.score)
+        self.score.update_idletasks()
+
+    def update_pass_turn(self):
         self.pass_turn["state"] = DISABLED
         if not has_valid_position(self.game.board, self.game.turn.color):
             self.pass_turn["state"] = NORMAL
-        elif self.show_valid_positions:
-            valid = valid_positions(self.game.board, self.game.turn.color)
-            for position in valid:
-                self.board[position]["image"] = self.valid_image
-        self.update_score()
-        self.window.update_idletasks()
+            self.pass_turn.update_idletasks()
 
     def bye(self):
         if tkMessageBox.askyesno(title="Quit", message="Really quit?"):
