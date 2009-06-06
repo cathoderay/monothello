@@ -46,7 +46,7 @@ def heuristic2(board):
 
 def minimax(board, depth, turn, heuristic=heuristic2):
     if depth == 0 or end_game(board):
-        return (heuristic1(board), None)
+        return (heuristic(board), None)
     else:
         valid = valid_positions(board, turn)
         movement = None

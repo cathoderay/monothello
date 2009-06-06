@@ -3,6 +3,7 @@ import unittest
 import minimax
 from game import Board
 
+
 class TestHeuristic1(unittest.TestCase):
     def test_configuration1(self):
         minimax.PLAYER = "W"
