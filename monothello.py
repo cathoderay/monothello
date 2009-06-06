@@ -44,7 +44,7 @@ class Application:
         self.menu = Menu(self.window)
         self.create_game_menu()
         self.create_settings_menu()
-        self.create_help_menu()        
+        self.create_help_menu()
         self.window.config(menu=self.menu)
 
     def create_game_menu(self):
@@ -63,7 +63,6 @@ class Application:
         settings = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Settings", menu=settings, underline=0)
         settings.add_checkbutton(label="Show valid positions",
-                                 variable=self.show_valid_positions,
                                  command=self.toggle_show_valid_positions,
                                  underline=0)
 
@@ -71,69 +70,39 @@ class Application:
 
         first_player = Menu(settings, tearoff=0)
         settings.add_cascade(label="First Player", menu=first_player, underline=0)        
-        first_player.add_radiobutton(label="Black",
-                                     variable=self.color_first_player,
-                                     value=0,
+        first_player.add_radiobutton(label="Black", variable=self.color_first_player,
                                      command=lambda color="B": self.set_first_player(color),
                                      underline=0)
-        first_player.add_radiobutton(label="White",
-                                     variable=self.color_first_player,
-                                     value=1,
+        first_player.add_radiobutton(label="White", variable=self.color_first_player,
                                      command=lambda color="W": self.set_first_player(color),
                                      underline=0)
 
         mode = Menu(settings, tearoff=0)
         settings.add_cascade(label="Mode", menu=mode, underline=0)
-        mode.add_radiobutton(label="Human vs Human",
-                             variable=self.mode,
-                             value=0,
+        mode.add_radiobutton(label="Human vs Human", variable=self.mode,
                              command=lambda v=0: self.set_mode(v),
                              underline=0)
-        mode.add_radiobutton(label="Human vs Computer",
-                             variable=self.mode,
-                             value=1,
+        mode.add_radiobutton(label="Human vs Computer", variable=self.mode, 
                              command=lambda v=1: self.set_mode(v),
                              underline=1)
-        mode.add_radiobutton(label="Computer vs Human",
-                             variable=self.mode,
-                             value=2,
+        mode.add_radiobutton(label="Computer vs Human", variable=self.mode,
                              command=lambda v=2: self.set_mode(v),
                              underline=2)
 
         difficulty = Menu(settings, tearoff=0)
         settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
-
         difficulty.add_radiobutton(label="Baby",
-                                   variable=self.difficulty,
-                                   value=0,
                                    command=lambda depth=0: self.set_difficulty(depth),
                                    underline=0)
-        difficulty.add_radiobutton(label="Depth 1",
-                                   variable=self.difficulty,
-                                   value=1,
-                                   command=lambda depth=1: self.set_difficulty(depth),
-                                   underline=6)
-        difficulty.add_radiobutton(label="Depth 2",
-                                   variable=self.difficulty,
-                                   value=2,
-                                   command=lambda depth=2: self.set_difficulty(depth),
-                                   underline=6)
-        difficulty.add_radiobutton(label="Depth 3",
-                                   variable=self.difficulty,
-                                   value=3,
-                                   command=lambda depth=3: self.set_difficulty(depth),
-                                   underline=6)
-        difficulty.add_radiobutton(label="Depth 4",
-                                   variable=self.difficulty,
-                                   value=4,
-                                   command=lambda depth=4: self.set_difficulty(depth),
-                                   underline=6)
+        for i in range(1, 5):
+            difficulty.add_radiobutton(label="Depth %s" % i,
+                                       command=lambda depth=i: self.set_difficulty(depth),
+                                       underline=6)
 
         #set the default values
-        first_player.invoke(first_player.index('Black'))
-        mode.invoke(mode.index(1))
-        difficulty.invoke(difficulty.index('Depth 2'))
-
+        first_player.invoke(first_player.index("Black"))
+        mode.invoke(mode.index("Human vs Computer"))
+        difficulty.invoke(difficulty.index("Depth 2"))
 
     def create_board(self):
         self.score = Label(self.window)
