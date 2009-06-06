@@ -41,8 +41,7 @@ class Game():
         Check the end of the game.
 
         """
-        return not self.board.has_valid_position("W") and not \
-           self.board.has_valid_position("B")
+        return self.board.end_game()
 
     def __str__(self):
         string = "----------------------\n"
@@ -109,6 +108,14 @@ class Board(dict):
                 if self.is_valid_position(position, turn):
                     valid.append(position)
         return set(valid)
+
+    def end_game(self):
+        """Return a bool.
+        Check the end of the game.
+
+        """
+        return not self.has_valid_position("W") and not \
+           self.has_valid_position("B")
 
     def is_valid_position(self, position, turn):
         """Return a bool.

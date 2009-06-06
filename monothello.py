@@ -4,7 +4,7 @@ from Tkinter import *
 import tkMessageBox
 
 from engine import *
-from minimax import *
+import minimax
 
 
 class Application:
@@ -21,76 +21,116 @@ class Application:
 
         self.game = False
         self.show_valid_positions = False
-        self.difficulty = 0
+        self.difficulty = 1
         self.mode = 1
         self.color_first_player = "B"
-        self.white_image = PhotoImage(file="white.gif")
-        self.black_image = PhotoImage(file="black.gif")
-        self.empty_image = PhotoImage(file="empty.gif")
-        self.valid_image = PhotoImage(file="valid.gif")
-
         self.create_elements()
         self.window.mainloop()
 
     def create_elements(self):
+        self.load_images()
         self.create_menu()
         self.create_board()
-        self.create_options()
+        self.create_details()
+
+    def load_images(self):
+        self.white_image = PhotoImage(file="white.gif")
+        self.black_image = PhotoImage(file="black.gif")
+        self.empty_image = PhotoImage(file="empty.gif")
+        self.valid_image = PhotoImage(file="valid.gif")       
 
     def create_menu(self):
-        menu = Menu(self.window)
+        self.menu = Menu(self.window)
+        self.create_game_menu()
+        self.create_settings_menu()
+        self.create_help_menu()        
+        self.window.config(menu=self.menu)
 
-        game = Menu(menu, tearoff=0)
+    def create_game_menu(self):
+        game = Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Game", menu=game, underline=0)
         game.add_command(label="New", command=self.create_game, underline=0)
+        game.add_separator()
         game.add_command(label="Quit", command=self.bye, underline=0)
-        menu.add_cascade(label="Game", menu=game, underline=0)
 
-        settings = Menu(menu, tearoff=0)
-        settings.add_checkbutton(label="Show valid positions", 
+    def create_help_menu(self):
+        help = Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Help", menu=help, underline=0)
+        help.add_command(label="About", command=self.show_credits, underline=0)
+
+    def create_settings_menu(self):
+        settings = Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Settings", menu=settings, underline=0)
+        settings.add_checkbutton(label="Show valid positions",
+                                 variable=self.show_valid_positions,
                                  command=self.toggle_show_valid_positions,
                                  underline=0)
 
+        settings.add_separator()
+
         first_player = Menu(settings, tearoff=0)
+        settings.add_cascade(label="First Player", menu=first_player, underline=0)        
         first_player.add_radiobutton(label="Black",
                                      variable=self.color_first_player,
                                      command=lambda color="B": self.set_first_player(color),
                                      underline=0)
-
         first_player.add_radiobutton(label="White",
                                      variable=self.color_first_player,
                                      command=lambda color="W": self.set_first_player(color),
                                      underline=0)
-        settings.add_cascade(label="First Player", menu=first_player, underline=0)        
 
         mode = Menu(settings, tearoff=0)
+        settings.add_cascade(label="Mode", menu=mode, underline=0)
         mode.add_radiobutton(label="Human vs Human",
                              variable=self.mode,
+                             value=0,
                              command=lambda v=0: self.set_mode(v),
                              underline=0)
         mode.add_radiobutton(label="Human vs Computer",
                              variable=self.mode,
+                             value=1,
                              command=lambda v=1: self.set_mode(v),
                              underline=1)
         mode.add_radiobutton(label="Computer vs Human",
                              variable=self.mode,
+                             value=2,
                              command=lambda v=2: self.set_mode(v),
-                             underline=9)
-        settings.add_cascade(label="Mode", menu=mode, underline=0)
+                             underline=2)
 
         difficulty = Menu(settings, tearoff=0)
-        difficulty.add_radiobutton(label="Baby",
-                                   variable=self.difficulty,
-                                   command=lambda depth=0: self.set_difficulty(depth),
-                                   underline=0)
         settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
 
-        menu.add_cascade(label="Settings", menu=settings, underline=0)
+        difficulty.add_radiobutton(label="Baby",
+                                   variable=self.difficulty,
+                                   value=0,
+                                   command=lambda depth=0: self.set_difficulty(depth),
+                                   underline=0)
+        difficulty.add_radiobutton(label="Depth 1",
+                                   variable=self.difficulty,
+                                   value=1,
+                                   command=lambda depth=1: self.set_difficulty(depth),
+                                   underline=6)
+        difficulty.add_radiobutton(label="Depth 2",
+                                   variable=self.difficulty,
+                                   value=2,
+                                   command=lambda depth=2: self.set_difficulty(depth),
+                                   underline=6)
+        difficulty.add_radiobutton(label="Depth 3",
+                                   variable=self.difficulty,
+                                   value=3,
+                                   command=lambda depth=3: self.set_difficulty(depth),
+                                   underline=6)
+        difficulty.add_radiobutton(label="Depth 4",
+                                   variable=self.difficulty,
+                                   value=4,
+                                   command=lambda depth=4: self.set_difficulty(depth),
+                                   underline=6)
 
-        help = Menu(menu, tearoff=0)
-        help.add_command(label="About", command=self.show_credits, underline=0)
-        menu.add_cascade(label="Help", menu=help, underline=0)
-        
-        self.window.config(menu=menu)
+        #set the default values
+        first_player.invoke(first_player.index('Black'))
+        mode.invoke(mode.index('Human vs Computer'))
+        difficulty.invoke(difficulty.index('Baby'))
+
 
     def create_board(self):
         self.score = Label(self.window)
@@ -110,7 +150,7 @@ class Application:
                 button.pack(side=LEFT, fill=BOTH, expand=1, padx=0, pady=0)
                 self.board.update( {(row, column): button} )
 
-    def create_options(self):
+    def create_details(self):
         self.pass_turn = Button(self.window, text="Pass", 
                                 state=DISABLED,
                                 command=self.pass_turn)
@@ -167,24 +207,20 @@ class Application:
             self.computer_play()
         message = "%s's turn." % self.game.turn.color
         self.update_status(message)
+        self.update_board()
 
     def show_credits(self):
         message = "MonOthello\nv.: 1.0"
         tkMessageBox.showinfo(title="About", message=message)
 
-    def bye(self):
-        if tkMessageBox.askyesno(title="Quit", message="Really quit?"):
-            quit()
-
     def update_score(self):
-        self.score["text"] = "%s: %s | %s: %s" % \
-                             (self.game.player1.color, 
+        self.score["text"] = "%s(%s): %s | %s(%s): %s" % \
+                             (self.game.player1.color,
+                              self.game.player1.mode, 
                               self.game.player1.score, 
-                              self.game.player2.color, 
+                              self.game.player2.color,
+                              self.game.player2.mode, 
                               self.game.player2.score)
-
-    def update_status(self, message):
-        self.status["text"] = message
 
     def go(self, position):
         if not self.game:
@@ -197,30 +233,36 @@ class Application:
 
     def play(self, position):
         """Move a piece to the given position."""
-        if self.game:
-            if not self.game.play(position):
-                message = "Invalid move. It's %s's turn." % self.game.turn.color
-                self.update_status(message)
-                return
-            print self.game
+        valid = self.game.play(position)
+        if not valid:
+            message = "Invalid move. It's %s's turn." % self.game.turn.color
+            self.update_status(message)
+        else:
             message = "%s's turn." % (self.game.turn.color)
             self.update_status(message)
-            self.update_board()          
+            self.update_board()
             self.check_next_turn()
 
-    def computer_play(self):
+    def computer_play(self):            
         if self.difficulty == 0:
-            position = ingenuos(self.game.board, self.game.turn.color)
+            position = minimax.ingenuos(self.game.board, self.game.turn.color)
             self.game.play(position)
-        print self.game
+        else:
+            minimax.PLAYER = self.game.turn.color
+            position = minimax.minimax(self.game.board, self.difficulty, self.game.turn.color)[1]
+            self.game.play(position)
+        message = "%s's turn." % (self.game.turn.color)        
+        self.update_status(message)
         self.update_board()
-        self.check_next_turn()
+        self.check_next_turn()       
 
     def check_next_turn(self):
         if self.game.test_end():
+            self.update_status("End of game.")
+            self.update_board()
             self.show_end()
-            self.game = False
             self.pass_turn["state"] = DISABLED
+            self.game = False
             return
         if self.game.turn.mode == "C":
             if not self.game.board.has_valid_position(self.game.turn.color):
@@ -229,34 +271,20 @@ class Application:
                           (self.game.turn.color)
                 self.update_status(message)
                 self.update_board()
+                return
             else:
                 #computer always has a movement to do
+                self.update_status("Computer is 'thinking'. Please, wait a moment...")
+                self.update_board()            
                 self.computer_play()
-                try:
-                    message = "%s's turn." % (self.game.turn.color)
-                    self.update_status(message)
-                    self.update_board()
-                except:
-                    pass
-        else:
-            if not self.game.board.has_valid_position(self.game.turn.color):
-                message = "%s must pass." % (self.game.turn.color)
-                self.update_status(message)
-                self.update_board()
-            else:
-                message = "%s's turn." % (self.game.turn.color)
-                self.update_status(message)
-                self.update_board()
 
     def show_end(self):
         message = "End of game."
         tkMessageBox.showinfo(title="End", message=message)
 
-    def disable_pieces(self):
-        for i in range(8):
-            for j in range(8):
-                position = self.board[(i, j)]
-                position["state"] = DISABLED
+    def update_status(self, message):
+        self.status["text"] = message
+        self.window.update_idletasks()
 
     def update_board(self):
         """Update the pieces from the engine's board."""
@@ -271,7 +299,6 @@ class Application:
                 else:
                     position["image"] = self.empty_image
 
-
         self.pass_turn["state"] = DISABLED
         if not self.game.board.has_valid_position(self.game.turn.color):
             self.pass_turn["state"] = NORMAL
@@ -280,7 +307,11 @@ class Application:
             for position in valid_positions:
                 self.board[position]["image"] = self.valid_image
         self.update_score()
+        self.window.update_idletasks()
 
+    def bye(self):
+        if tkMessageBox.askyesno(title="Quit", message="Really quit?"):
+            quit()
 
 if __name__ == "__main__":
     app = Application()
