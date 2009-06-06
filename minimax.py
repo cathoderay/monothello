@@ -41,6 +41,7 @@ def heuristic2(board, turn):
                     value += 5
                 else:
                     value += 10
+    return value
 
 
 def minimax(board, depth, turn, heuristic=heuristic2):
