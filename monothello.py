@@ -3,7 +3,8 @@ import time
 from Tkinter import *
 import tkMessageBox
 
-from engine import *
+from game import *
+from util import *
 import minimax
 
 
@@ -72,10 +73,12 @@ class Application:
         settings.add_cascade(label="First Player", menu=first_player, underline=0)        
         first_player.add_radiobutton(label="Black",
                                      variable=self.color_first_player,
+                                     value=0,
                                      command=lambda color="B": self.set_first_player(color),
                                      underline=0)
         first_player.add_radiobutton(label="White",
                                      variable=self.color_first_player,
+                                     value=1,
                                      command=lambda color="W": self.set_first_player(color),
                                      underline=0)
 
@@ -128,8 +131,8 @@ class Application:
 
         #set the default values
         first_player.invoke(first_player.index('Black'))
-        mode.invoke(mode.index('Human vs Computer'))
-        difficulty.invoke(difficulty.index('Baby'))
+        mode.invoke(mode.index(1))
+        difficulty.invoke(difficulty.index('Depth 2'))
 
 
     def create_board(self):
@@ -174,8 +177,7 @@ class Application:
             p1_mode = "C"
             p2_mode = "H"
         self.game = Game(p1_color=self.color_first_player,
-                         p1_mode=p1_mode, p2_mode=p2_mode,
-                         difficulty=self.difficulty)
+                         p1_mode=p1_mode, p2_mode=p2_mode)
         self.game.start()
         if self.mode == 2:
             self.computer_play()
@@ -265,7 +267,7 @@ class Application:
             self.game = False
             return
         if self.game.turn.mode == "C":
-            if not self.game.board.has_valid_position(self.game.turn.color):
+            if not has_valid_position(self.game.board, self.game.turn.color):
                 self.game.change_turn()
                 message = "Computer Passed. Now it's %s's turn." % \
                           (self.game.turn.color)
@@ -300,11 +302,11 @@ class Application:
                     position["image"] = self.empty_image
 
         self.pass_turn["state"] = DISABLED
-        if not self.game.board.has_valid_position(self.game.turn.color):
+        if not has_valid_position(self.game.board, self.game.turn.color):
             self.pass_turn["state"] = NORMAL
         elif self.show_valid_positions:
-            valid_positions = self.game.board.valid_positions(self.game.turn.color)
-            for position in valid_positions:
+            valid = valid_positions(self.game.board, self.game.turn.color)
+            for position in valid:
                 self.board[position]["image"] = self.valid_image
         self.update_score()
         self.window.update_idletasks()

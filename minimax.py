@@ -1,27 +1,28 @@
 from copy import deepcopy
 import random
-from engine import *
+from util import *
+
 
 PLAYER = "W"
 INFINITUM = 100000000000000000000000000000000000000000000
 
 
 def ingenuos(board, turn):
-    return random.choice(list(board.valid_positions(turn)))
+    return random.choice(list(valid_positions(board, turn)))
 
 
 def heuristic1(board, turn):
     if turn == "W":
-        return board.count_pieces("W") - board.count_pieces("B")
+        return count_pieces(board, "W") - count_pieces(board, "B")
     else:
-        return board.count_pieces("B") - board.count_pieces("W")        
+        return count_pieces(board, "B") - count_pieces(board, "W")        
 
 
 def minimax(board, depth, turn, heuristic=heuristic1):
-    if depth == 0 or board.end_game():
+    if depth == 0 or end_game(board):
         return (heuristic1(board, PLAYER), None)
     else:
-        valid_positions = board.valid_positions(turn)
+        valid = valid_positions(board, turn)
         movement = None
         if turn == PLAYER:
             best = -INFINITUM
@@ -32,9 +33,9 @@ def minimax(board, depth, turn, heuristic=heuristic1):
             new_turn = "B"
         else:
             new_turn = "W"
-        for position in valid_positions:
+        for position in valid:
             copy_board = deepcopy(board)
-            copy_board.move(position, turn)
+            move(copy_board, position, turn)
             value = minimax(copy_board, depth-1, new_turn, heuristic)[0]
 
             if turn == PLAYER:
