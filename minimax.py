@@ -18,7 +18,32 @@ def heuristic1(board, turn):
         return count_pieces(board, "B") - count_pieces(board, "W")        
 
 
-def minimax(board, depth, turn, heuristic=heuristic1):
+def heuristic2(board, turn):
+    value = 0
+    for i in range(8):
+        for j in range(8):
+            if board[(i, j)] == PLAYER:
+                if (i == 0 and j == 0):
+                   value += 20
+                elif (i == 7 and j == 7):
+                    value += 20
+                elif (i == 0 and j == 7):
+                    value += 20
+                elif (i == 7 and j == 0):
+                    value += 20
+                elif (i == 3 and j == 3):
+                    value += 5
+                elif (i == 3 and j == 4):
+                    value += 5
+                elif (i == 4 and j == 3):
+                    value += 5
+                elif (i == 4 and j == 4):
+                    value += 5
+                else:
+                    value += 10
+
+
+def minimax(board, depth, turn, heuristic=heuristic2):
     if depth == 0 or end_game(board):
         return (heuristic1(board, PLAYER), None)
     else:
