@@ -39,14 +39,17 @@ class Game():
         else:
             self.turn = self.player1
 
-    def winning_side(self):
+    def winning_side(self, formatted=True):
         """Return a string with the winning side."""        
         self.update_scores()
         if self.player1.score > self.player2.score:
             winning = self.player1.color
+            if not formatted: return winning
         elif self.player1.score < self.player2.score:
             winning = self.player2.color
+            if not formatted: return winning
         else:
+            if not formatted: return None
             return "Tie."
         if winning == "W":
             return "White win!"

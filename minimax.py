@@ -7,7 +7,7 @@ PLAYER = "W"
 INFINITUM = 100000000000000000000000000000000000000000000
 
 
-def ingenuos(board, turn):
+def ingenuous(board, turn):
     return random.choice(list(valid_positions(board, turn)))
 
 
@@ -15,7 +15,7 @@ def heuristic1(board):
     if PLAYER == "W":
         return count_pieces(board, "W") - count_pieces(board, "B")
     else:
-        return count_pieces(board, "B") - count_pieces(board, "W")        
+        return count_pieces(board, "B") - count_pieces(board, "W")
 
 
 def heuristic2(board):

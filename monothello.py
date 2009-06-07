@@ -38,9 +38,7 @@ class Application:
         self.white_image = PhotoImage(file="white.gif")
         self.black_image = PhotoImage(file="black.gif")
         self.empty_image = PhotoImage(file="empty.gif")
-        self.valid_image = PhotoImage(file="valid.gif")       
-        self.black_took_image = PhotoImage(file="black_took.gif")
-        self.white_took_image = PhotoImage(file="white_took.gif")
+        self.valid_image = PhotoImage(file="valid.gif")
 
     def create_menu(self):
         self.menu = Menu(self.window)
@@ -179,9 +177,10 @@ class Application:
         self.game.change_turn()
         if self.game.turn.mode == "C":
             self.computer_play()
-        message = "%s's turn." % self.game.turn.color
-        self.update_status(message)
-        self.update_board()
+        if self.game:
+            message = "%s's turn." % self.game.turn.color
+            self.update_status(message)
+            self.update_board()
 
     def show_credits(self):
         message = "MonOthello\nv.: 1.0"
@@ -212,7 +211,7 @@ class Application:
 
     def computer_play(self):            
         if self.difficulty == 0:
-            position = minimax.ingenuos(self.game.board, self.game.turn.color)
+            position = minimax.ingenuous(self.game.board, self.game.turn.color)
             self.game.play(position)
         else:
             minimax.PLAYER = self.game.turn.color
