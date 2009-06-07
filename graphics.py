@@ -5,8 +5,8 @@ from pylab import *
 figure(1, figsize=(4,4))
 ax = axes([0.1, 0.1, 0.8, 0.8])
 
-labels = ['Baby', 'Tie', 'Weak' ]
-fracs = [3800, 373, 5827]
+labels = ['Baby', '', 'Weak' ]
+fracs = [35, 2, 63]
 
 explode=(0, 0, 0)
 pie(fracs, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True)

@@ -9,24 +9,26 @@ def play_game(game):
         turn = game.turn.color
         board = game.board
         if has_valid_position(board, turn):
+            minimax.PLAYER = turn
             if turn == "B":
-                position = minimax.ingenuous(board, turn)
+                position = minimax.minimax(board, 1, turn, minimax.posicional)[1]
             else:
-                minimax.PLAYER = turn
-                position = minimax.minimax(board, 1, turn, minimax.heuristic1)[1]
+                position = minimax.minimax(board, 1, turn, minimax.greedy)[1]
+
             game.play(position)
         else:
             game.change_turn()
+
     return game.winning_side(formatted=False)            
 
 
 def run(times):
     rounds = times
-    #black - ingenuous
+    #black
     p1_color = "B"
     p1_win = 0
 
-    #white - minimax with heuristic1 - profundidade 1
+    #white
     p2_color = "W"
     p2_win = 0
 
@@ -59,4 +61,4 @@ def run(times):
 
 
 if __name__ == "__main__":
-    run(10000)
+    run(200)

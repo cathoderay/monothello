@@ -21,6 +21,39 @@ class TestCountPieces(unittest.TestCase):
         self.assertEqual(count_pieces(board, "B"), 10)
         self.assertEqual(count_pieces(board, "W"), 2)
 
+    def test_20_blacks_5_whites(self):
+        board = Board()
+        board[(0, 1)] = "B"
+        board[(0, 2)] = "B"
+        board[(0, 3)] = "B"
+        board[(0, 4)] = "B"
+        board[(0, 5)] = "B"
+        board[(0, 6)] = "B"
+        board[(1, 0)] = "B"
+        board[(1, 1)] = "B"
+        board[(1, 2)] = "B"
+        board[(1, 3)] = "B"
+
+        board[(2, 1)] = "B"
+        board[(2, 2)] = "B"
+        board[(2, 3)] = "B"
+        board[(2, 4)] = "B"
+        board[(2, 5)] = "B"
+        board[(2, 6)] = "B"
+        board[(3, 0)] = "B"
+        board[(3, 1)] = "B"
+        board[(3, 2)] = "B"
+        board[(3, 3)] = "B"
+
+        board[(6, 0)] = "W"
+        board[(6, 1)] = "W"
+        board[(6, 2)] = "W"
+        board[(6, 3)] = "W"
+        board[(6, 4)] = "W"
+        self.assertEqual(count_pieces(board, "B"), 20)
+        self.assertEqual(count_pieces(board, "W"), 5)
+
+
 
 class TestPlayablePositions(unittest.TestCase):
     def test_6_valid_positions(self):
@@ -127,6 +160,36 @@ class TestValidPosition(unittest.TestCase):
         turn = "B"
         self.assertEqual(is_valid_position(board, position, turn), True)
 
+    def test_up_left_border(self):
+        board = Board()
+        board[(0, 0)] = "B"
+        board[(1, 1)] = "W"
+        position = (2, 2)
+        turn = "B"
+        self.assertEqual(is_valid_position(board, position, turn), True)
+
+    def test_up_left_border_2_pieces(self):
+        board = Board()
+        board[(0, 0)] = "B"
+        board[(1, 1)] = "W"
+        board[(2, 2)] = "W"
+        position = (3, 3)
+        turn = "B"
+        self.assertEqual(is_valid_position(board, position, turn), True)       
+
+    def test_up_left_border_6_pieces(self):
+        board = Board()
+        board[(0, 0)] = "B"
+        board[(1, 1)] = "W"
+        board[(2, 2)] = "W"
+        board[(3, 3)] = "W"
+        board[(4, 4)] = "W"
+        board[(5, 5)] = "W"
+        board[(6, 6)] = "W"
+        position = (7, 7)
+        turn = "B"
+        self.assertEqual(is_valid_position(board, position, turn), True)       
+
     def test_valid_configuration(self):
         board = Board()
         board[(3, 2)] = "W"
@@ -210,8 +273,38 @@ class TestMove(unittest.TestCase):
         board[(4, 6)] = "W"
         turn = "B"
         move(board, (3, 5), turn)
-        self.assertEqual(board[(4, 6)], "B")        
-        
+        self.assertEqual(board[(4, 6)], "B")  
+
+    def test_move_2_matches(self):
+        board = Board()
+        board[(2, 2)] = "B"
+        board[(3, 3)] = "W"
+        board[(1, 2)] = "B"
+        board[(1, 3)] = "W"
+        turn = "W"
+        move(board, (1, 1), turn)
+        self.assertEqual(board[(3, 3)], "W")  
+        self.assertEqual(board[(1, 3)], "W")          
+        self.assertEqual(board[(2, 2)], "W")  
+        self.assertEqual(board[(1, 2)], "W")
+
+    def test_move_3_matches(self):
+        board = Board()
+        board[(2, 2)] = "B"
+        board[(3, 3)] = "W"
+        board[(1, 2)] = "B"
+        board[(1, 3)] = "W"
+        board[(2, 1)] = "B"
+        board[(3, 1)] = "W"
+        turn = "W"
+        move(board, (1, 1), turn)
+        self.assertEqual(board[(2, 1)], "W")
+        self.assertEqual(board[(3, 1)], "W")
+        self.assertEqual(board[(3, 3)], "W")
+        self.assertEqual(board[(1, 3)], "W")
+        self.assertEqual(board[(2, 2)], "W")
+        self.assertEqual(board[(1, 2)], "W")
+
 
 if __name__ == "__main__":
     unittest.main()

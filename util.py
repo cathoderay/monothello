@@ -1,3 +1,4 @@
+import random
 
 
 directions = [(1, 0), (0, 1), (-1, 0), (0, -1), 
@@ -32,6 +33,9 @@ def valid_positions(board, turn):
             position = (i, j)
             if is_valid_position(board, position, turn):
                 valid.append(position)
+
+    random.shuffle(valid)
+
     return set(valid)
 
 
@@ -72,6 +76,7 @@ def is_valid_position(board, position, turn):
 
 def move(board, position, turn):
     """Move to the given position a piece of the color of the turn."""
+
     to_change = []
     for direction in directions:
         between = 0

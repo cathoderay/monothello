@@ -211,9 +211,9 @@ class Application:
 
     def computer_play(self):            
         if self.difficulty == 0:
-            position = minimax.ingenuous(self.game.board, self.game.turn.color)
+            position = minimax.baby(self.game.board, self.game.turn.color)
             self.game.play(position)
-        else:
+        elif self.difficulty:
             minimax.PLAYER = self.game.turn.color
             position = minimax.minimax(self.game.board, self.difficulty, self.game.turn.color)[1]
             self.game.play(position)

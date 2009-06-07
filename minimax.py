@@ -7,18 +7,25 @@ PLAYER = "W"
 INFINITUM = 100000000000000000000000000000000000000000000
 
 
-def ingenuous(board, turn):
+def baby(board, turn):
     return random.choice(list(valid_positions(board, turn)))
 
 
-def heuristic1(board):
+def weak(board):
     if PLAYER == "W":
         return count_pieces(board, "W") - count_pieces(board, "B")
     else:
         return count_pieces(board, "B") - count_pieces(board, "W")
 
 
-def heuristic2(board):
+def greedy(board):
+    if  PLAYER == "W":
+        return count_pieces(board, "W")
+    else:
+        return count_pieces(board, "B")
+
+
+def posicional(board):
     value = 0
     for i in range(8):
         for j in range(8):
@@ -40,38 +47,46 @@ def heuristic2(board):
                     value += 10
     return value
 
-def minimax(board, depth, turn, heuristic=heuristic2):
+
+def is_max(turn):
+    if turn == PLAYER:
+        return True
+    else:
+        return False
+
+
+def change_turn(turn):
+    if turn == "W":
+        return "B"
+    else:
+        return "W"
+
+
+def minimax(board, depth, turn, heuristic=greedy):
     if depth == 0 or end_game(board):
         return (heuristic(board), None)
     else:
         movement = None
-        if turn == PLAYER:
-            best = -INFINITUM
+        if not has_valid_position(board, turn):
+            child = deepcopy(board)
+            return (minimax(child, depth-1, change_turn(turn), heuristic)[0], movement)
         else:
-            best = INFINITUM
-        valid = valid_positions(board, turn)
-        if len(valid) == 0:
-            if turn == "W":
-                new_turn = "B"
+            if is_max(turn):
+                best = -INFINITUM
             else:
-                new_turn = "W"
-            copy_board = deepcopy(board)
-            return (minimax(copy_board, depth-1, new_turn, heuristic)[0], movement)
-        else:
-            for position in valid:
-                copy_board = deepcopy(board)
-                move(copy_board, position, turn)
-                if turn == "W":
-                    new_turn = "B"
-                else:
-                    new_turn = "W"
-                value = minimax(copy_board, depth-1, new_turn, heuristic)[0]
+                best = -INFINITUM
+            valid = valid_positions(board, turn)
+            for position in valid:             
+                child = deepcopy(board)
+                move(child, position, turn)
+                child_value = minimax(child, depth-1, change_turn(turn), heuristic)[0]
 
-                if turn == PLAYER:
-                    if value >= best:
-                        best = value
-                        movement = position
+                if is_max(turn):
+                    best = max(child_value, best)
                 else:
-                    if value <= best:
-                        best = value
+                    best = min(child_value, best)
+
+                if best == child_value:
+                    movement = position           
+
         return (best, movement)
