@@ -1,28 +1,29 @@
-from game import *
-from util import *
-import minimax
 import matplotlib
 
+from game import *
+from util import *
+import graphics
+import minimax
 
-def play_game(game):
+
+def play_game(game, heuristic1, heuristic2):
     while not end_game(game.board):
         turn = game.turn.color
         board = game.board
         if has_valid_position(board, turn):
             minimax.PLAYER = turn
             if turn == "B":
-                position = minimax.minimax(board, 1, turn, minimax.posicional)[1]
+                position = minimax.minimax(board, 1, turn, heuristic1)[1]
             else:
-                position = minimax.minimax(board, 1, turn, minimax.greedy)[1]
+                position = minimax.minimax(board, 1, turn, heuristic2)[1]
 
             game.play(position)
         else:
             game.change_turn()
+    return game.winning_side(formatted=False)
 
-    return game.winning_side(formatted=False)            
 
-
-def run(times):
+def run(p1_name, heuristic1, p2_name, heuristic2, times):
     rounds = times
     #black
     p1_color = "B"
@@ -38,7 +39,7 @@ def run(times):
         print 'Started game %s' % i
         game = Game(p1_color="B", p1_mode="C", p2_mode="C")
         game.start()
-        winner = play_game(game)
+        winner = play_game(game, heuristic1, heuristic2)
         if winner == p1_color:
             p1_win += 1
             print '>>>>>>>>>>>>>>>>>>> Black win!'
@@ -50,15 +51,22 @@ def run(times):
             ties += 1
         print 'finished game %s' % i
 
+
     print 'After %s rounds:\n' % rounds
-    print 'p1: %s ' % p1_win
-    print 'p2: %s' % p2_win
+    print '%s: %s ' % (p1_name, p1_win)
+    print '%s: %s' % (p2_name, p2_win)
     print 'ties: %s' % ties
     print 'Probabilities:'
-    print 'fp1: %s' % str(p1_win/float(rounds))
-    print 'fp2: %s' % str(p2_win/float(rounds))
+    print '%s: %s' % (p1_name, str(p1_win/float(rounds)))
+    print '%s: %s' % (p2_name, str(p2_win/float(rounds)))
     print 'ties: %s' % str(ties/float(rounds))
+
+    graphics.plot(p1_name, p1_win, p2_name, p2_win, ties)    
 
 
 if __name__ == "__main__":
-    run(200)
+    run(p1_name="Greedy",
+        heuristic1=minimax.greedy, 
+        p2_name="Posicional",
+        heuristic2=minimax.posicional, 
+        times=20)

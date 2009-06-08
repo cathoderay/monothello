@@ -7,8 +7,8 @@ PLAYER = "W"
 INFINITUM = 100000000000000000000000000000000000000000000
 
 
-def baby(board, turn):
-    return random.choice(list(valid_positions(board, turn)))
+def baby(board):
+    return 0
 
 
 def weak(board):
@@ -62,19 +62,20 @@ def change_turn(turn):
         return "W"
 
 
-def minimax(board, depth, turn, heuristic=greedy):
+def minimax(board, depth, turn, heuristic=weak):
     if depth == 0 or end_game(board):
         return (heuristic(board), None)
     else:
         movement = None
         if not has_valid_position(board, turn):
+
             child = deepcopy(board)
             return (minimax(child, depth-1, change_turn(turn), heuristic)[0], movement)
         else:
             if is_max(turn):
                 best = -INFINITUM
             else:
-                best = -INFINITUM
+                best = INFINITUM
             valid = valid_positions(board, turn)
             for position in valid:             
                 child = deepcopy(board)
@@ -85,8 +86,6 @@ def minimax(board, depth, turn, heuristic=greedy):
                     best = max(child_value, best)
                 else:
                     best = min(child_value, best)
-
                 if best == child_value:
-                    movement = position           
-
-        return (best, movement)
+                    movement = position          
+            return (best, movement)

@@ -20,12 +20,15 @@ class Application:
         self.window.wm_maxsize(width="460", height="520")
         self.window.wm_minsize(width="460", height="520")
 
+
         self.game = False
         self.show_valid_positions = False
         self.difficulty = 1
         self.mode = 1
         self.color_first_player = "B"
+        self.heuristic = minimax.baby
         self.create_elements()
+        self.update_status("Welcome to MonOthello!")
         self.window.mainloop()
 
     def create_elements(self):
@@ -71,38 +74,80 @@ class Application:
         first_player = Menu(settings, tearoff=0)
         settings.add_cascade(label="First Player", menu=first_player, underline=0)        
         first_player.add_radiobutton(label="Black", variable=self.color_first_player,
-                                     command=lambda color="B": self.set_first_player(color),
+                                     command=lambda: self.set_first_player("B"),
                                      underline=0)
         first_player.add_radiobutton(label="White", variable=self.color_first_player,
-                                     command=lambda color="W": self.set_first_player(color),
+                                     command=lambda: self.set_first_player("W"),
                                      underline=0)
-
+        
         mode = Menu(settings, tearoff=0)
         settings.add_cascade(label="Mode", menu=mode, underline=0)
-        mode.add_radiobutton(label="Human vs Human", variable=self.mode,
-                             command=lambda v=0: self.set_mode(v),
-                             underline=0)
+        mode.add_radiobutton(label="Human vs Human", variable=self.mode, 
+                             command=lambda: self.set_mode(0), underline=0)
         mode.add_radiobutton(label="Human vs Computer", variable=self.mode, 
-                             command=lambda v=1: self.set_mode(v),
-                             underline=1)
-        mode.add_radiobutton(label="Computer vs Human", variable=self.mode,
-                             command=lambda v=2: self.set_mode(v),
-                             underline=2)
+                             command=lambda: self.set_mode(1), underline=1)
+        mode.add_radiobutton(label="Computer vs Human", variable=self.mode, 
+                             command=lambda: self.set_mode(2), underline=12)
+        
+        heuristic = Menu(settings, tearoff=0)
+        settings.add_cascade(label="Heuristic", menu=heuristic, underline=0)
+        heuristic.add_radiobutton(label="Baby", variable=self.heuristic, underline=0, 
+                                  command=lambda: self.set_heuristic(minimax.baby))
 
-        difficulty = Menu(settings, tearoff=0)
+        heuristic.add_radiobutton(label="Weak", variable=self.heuristic, underline=0,
+                                  command=lambda: self.set_heuristic(minimax.weak))
+
+        heuristic.add_radiobutton(label="Greedy", variable=self.heuristic, underline=0,
+                                  command=lambda: self.set_heuristic(minimax.greedy))
+
+        heuristic.add_radiobutton(label="Posicional", variable=self.heuristic, underline=0,
+                                  command=lambda: self.set_heuristic(minimax.posicional))
+
+        difficulty = Menu(mode, tearoff=0)
         settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
-        difficulty.add_radiobutton(label="Baby",
-                                   command=lambda depth=0: self.set_difficulty(depth),
-                                   underline=0)
-        for i in range(1, 5):
-            difficulty.add_radiobutton(label="Depth %s" % i,
-                                       command=lambda depth=i: self.set_difficulty(depth),
-                                       underline=6)
+        difficulty.add_radiobutton(label="Depth 1", 
+                                   variable=self.difficulty,
+                                   command=lambda: self.set_difficulty(1),
+                                   underline=6)
+        difficulty.add_radiobutton(label="Depth 2", 
+                                   variable=self.difficulty,
+                                   command=lambda: self.set_difficulty(2),
+                                   underline=6)
+        difficulty.add_radiobutton(label="Depth 3", 
+                                   variable=self.difficulty,
+                                   command=lambda: self.set_difficulty(3),
+                                   underline=6)
+        difficulty.add_radiobutton(label="Depth 4", 
+                                   variable=self.difficulty,
+                                   command=lambda: self.set_difficulty(4),
+                                   underline=6)
+
 
         #set the default values
         first_player.invoke(first_player.index("Black"))
         mode.invoke(mode.index("Human vs Computer"))
-        difficulty.invoke(difficulty.index("Depth 2"))
+        difficulty.invoke(difficulty.index(1))
+        heuristic.invoke(heuristic.index("Weak"))
+
+    def set_mode(self, m):
+        self.mode = m
+        print 'Mode changed to:'
+        print self.mode
+
+    def set_first_player(self, c):
+        self.color_first_player = c
+        print 'First player changed to to:'
+        print self.color_first_player
+
+    def set_difficulty(self, d):
+        self.difficulty = d
+        print 'Difficulty changed to:'
+        print self.difficulty
+    
+    def set_heuristic(self, h):
+        self.heuristic = h
+        print 'Heuristic changed to:'
+        print self.heuristic
 
     def create_board(self):
         self.score = Label(self.window)
@@ -128,7 +173,6 @@ class Application:
                                 command=self.pass_turn)
         self.pass_turn.pack(side=RIGHT)
         self.status = Label(self.window)
-        self.update_status("Welcome to MonOthello!")
         self.status.pack(side=LEFT)
 
     def create_game(self):
@@ -160,15 +204,6 @@ class Application:
         self.show_valid_positions = not self.show_valid_positions           
         if self.game:
             self.update_board()
-
-    def set_mode(self, value):
-        self.mode = value
-
-    def set_first_player(self, color):
-        self.color_first_player = color
-
-    def set_difficulty(self, v):
-        self.difficulty = v
 
     def pass_turn(self):
         """Pass the turn when it's not possible to play."""
@@ -210,13 +245,14 @@ class Application:
             self.check_next_turn()
 
     def computer_play(self):            
-        if self.difficulty == 0:
-            position = minimax.baby(self.game.board, self.game.turn.color)
-            self.game.play(position)
-        elif self.difficulty:
-            minimax.PLAYER = self.game.turn.color
-            position = minimax.minimax(self.game.board, self.difficulty, self.game.turn.color)[1]
-            self.game.play(position)
+
+        minimax.PLAYER = self.game.turn.color
+        print self.heuristic
+        position = minimax.minimax(self.game.board, 
+                                   self.difficulty, 
+                                   self.game.turn.color, 
+                                   self.heuristic)[1]
+        self.game.play(position)
         message = "%s's turn." % (self.game.turn.color)        
         self.update_status(message)
         self.update_board()
