@@ -305,10 +305,6 @@ class TestMove(unittest.TestCase):
         self.assertEqual(board[(2, 2)], "W")
         self.assertEqual(board[(1, 2)], "W")
 
-    def test_move_1_match(self):
-        board = Board()
-                
-
 
 if __name__ == "__main__":
     unittest.main()

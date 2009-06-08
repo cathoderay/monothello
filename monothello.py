@@ -23,10 +23,10 @@ class Application:
 
         self.game = False
         self.show_valid_positions = False
-        self.difficulty = 1
+        self.difficulty = 0
         self.mode = 1
         self.color_first_player = "B"
-        self.heuristic = minimax.baby
+        self.heuristic = 2
         self.create_elements()
         self.update_status("Welcome to MonOthello!")
         self.window.mainloop()
@@ -65,13 +65,20 @@ class Application:
     def create_settings_menu(self):
         settings = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Settings", menu=settings, underline=0)
-        settings.add_checkbutton(label="Show valid positions",
+
+        settings.add_checkbutton(label="Show valid positions", variable=self.show_valid_positions,
                                  command=self.toggle_show_valid_positions,
                                  underline=0)
 
         settings.add_separator()
 
+
         first_player = Menu(settings, tearoff=0)
+        mode = Menu(settings, tearoff=0)
+        heuristic = Menu(settings, tearoff=0)
+        difficulty = Menu(settings, tearoff=0)
+
+
         settings.add_cascade(label="First Player", menu=first_player, underline=0)        
         first_player.add_radiobutton(label="Black", variable=self.color_first_player,
                                      command=lambda: self.set_first_player("B"),
@@ -79,8 +86,9 @@ class Application:
         first_player.add_radiobutton(label="White", variable=self.color_first_player,
                                      command=lambda: self.set_first_player("W"),
                                      underline=0)
-        
-        mode = Menu(settings, tearoff=0)
+
+
+
         settings.add_cascade(label="Mode", menu=mode, underline=0)
         mode.add_radiobutton(label="Human vs Human", variable=self.mode, 
                              command=lambda: self.set_mode(0), underline=0)
@@ -88,22 +96,26 @@ class Application:
                              command=lambda: self.set_mode(1), underline=1)
         mode.add_radiobutton(label="Computer vs Human", variable=self.mode, 
                              command=lambda: self.set_mode(2), underline=12)
-        
-        heuristic = Menu(settings, tearoff=0)
+
+
         settings.add_cascade(label="Heuristic", menu=heuristic, underline=0)
         heuristic.add_radiobutton(label="Baby", variable=self.heuristic, underline=0, 
-                                  command=lambda: self.set_heuristic(minimax.baby))
+                                  command=lambda: self.set_heuristic(minimax.baby),
+                                  value=0)
 
         heuristic.add_radiobutton(label="Weak", variable=self.heuristic, underline=0,
-                                  command=lambda: self.set_heuristic(minimax.weak))
+                                  command=lambda: self.set_heuristic(minimax.weak),
+                                  value=1)
 
         heuristic.add_radiobutton(label="Greedy", variable=self.heuristic, underline=0,
-                                  command=lambda: self.set_heuristic(minimax.greedy))
+                                  command=lambda: self.set_heuristic(minimax.greedy),
+                                  value=2)
 
         heuristic.add_radiobutton(label="Posicional", variable=self.heuristic, underline=0,
-                                  command=lambda: self.set_heuristic(minimax.posicional))
+                                  command=lambda: self.set_heuristic(minimax.posicional),
+                                  value=3)
 
-        difficulty = Menu(mode, tearoff=0)
+
         settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
         difficulty.add_radiobutton(label="Depth 1", 
                                    variable=self.difficulty,
@@ -128,6 +140,7 @@ class Application:
         mode.invoke(mode.index("Human vs Computer"))
         difficulty.invoke(difficulty.index(1))
         heuristic.invoke(heuristic.index("Weak"))
+
 
     def set_mode(self, m):
         self.mode = m
@@ -247,7 +260,6 @@ class Application:
     def computer_play(self):            
 
         minimax.PLAYER = self.game.turn.color
-        print self.heuristic
         position = minimax.minimax(self.game.board, 
                                    self.difficulty, 
                                    self.game.turn.color, 
