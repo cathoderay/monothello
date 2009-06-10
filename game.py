@@ -105,6 +105,9 @@ class Board(dict):
         for i in range(8):
             a = ""
             for j in range(8):
-                a += self[(i, j)]
+                if self[(i, j)] == "E":
+                    a += '-'
+                else:
+                    a += self[(i, j)]
             string += a + '\n'
         return string

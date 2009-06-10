@@ -1,54 +1,15 @@
-from copy import deepcopy
+from copy import copy
 import random
+
 from util import *
+from heuristics import *
 
 
 PLAYER = "W"
 INFINITUM = 100000000000000000000000000000000000000000000
 
 
-def baby(board):
-    return 0
-
-
-def weak(board):
-    if PLAYER == "W":
-        return count_pieces(board, "W") - count_pieces(board, "B")
-    else:
-        return count_pieces(board, "B") - count_pieces(board, "W")
-
-
-def greedy(board):
-    if  PLAYER == "W":
-        return count_pieces(board, "W")
-    else:
-        return count_pieces(board, "B")
-
-
-def posicional(board):
-    value = 0
-    for i in range(8):
-        for j in range(8):
-            if board[(i, j)] == PLAYER:
-                if (i == 0 and j == 0) or (i == 7 and j == 7) or \
-                   (i == 0 and j == 7) or (i == 7 and j == 0):
-                    value += 20
-                elif (i == 3 and j == 3) or (i == 3 and j == 4) or \
-                     (i == 4 and j == 3) or (i == 4 and j == 4):
-                    value += 5
-                elif (i == 0 and j == 1) or (i == 1 and j == 0) or \
-                     (i == 7 and j == 1) or (i == 6 and j == 0) or \
-                     (i == 0 and j == 6) or (i == 1 and j == 7) or \
-                     (i == 7 and j == 6) or (i == 6 and j == 7) or \
-                     (i == 1 and j == 1) or (i == 6 and j == 6) or \
-                     (i == 6 and j == 1) or (i == 1 and j == 6):
-                    value += 0
-                else:
-                    value += 10
-    return value
-
-
-def is_max(turn):
+def is_max(turn): 
     if turn == PLAYER:
         return True
     else:
@@ -62,14 +23,14 @@ def change_turn(turn):
         return "W"
 
 
-def minimax(board, depth, turn, heuristic=weak):
+def minimax(board, depth, turn, heuristic):
     if depth == 0 or end_game(board):
-        return (heuristic(board), None)
+        value = heuristic(board, PLAYER)
+        return (heuristic(board, PLAYER), None)
     else:
         movement = None
         if not has_valid_position(board, turn):
-
-            child = deepcopy(board)
+            child = copy(board)
             return (minimax(child, depth-1, change_turn(turn), heuristic)[0], movement)
         else:
             if is_max(turn):
@@ -77,15 +38,24 @@ def minimax(board, depth, turn, heuristic=weak):
             else:
                 best = INFINITUM
             valid = valid_positions(board, turn)
-            for position in valid:             
-                child = deepcopy(board)
+            ties = []
+            for position in valid:
+                child = copy(board)
                 move(child, position, turn)
                 child_value = minimax(child, depth-1, change_turn(turn), heuristic)[0]
+                del(child)
 
                 if is_max(turn):
-                    best = max(child_value, best)
+                    if best == child_value:
+                        ties.append((best, position))
+                    elif child_value > best:
+                        best = child_value
+                        ties = [(best, position)]             
                 else:
-                    best = min(child_value, best)
-                if best == child_value:
-                    movement = position          
+                    if best == child_value:
+                        ties.append((best, position))
+                    elif child_value < best:
+                        best = child_value
+                        ties = [(best, position)]             
+            best, movement = random.choice(ties)
             return (best, movement)

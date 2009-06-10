@@ -34,8 +34,6 @@ def valid_positions(board, turn):
             if is_valid_position(board, position, turn):
                 valid.append(position)
 
-    random.shuffle(valid)
-
     return set(valid)
 
 

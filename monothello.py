@@ -1,10 +1,7 @@
-import time
-
 from Tkinter import *
 import tkMessageBox
 
 from game import *
-from util import *
 import minimax
 
 
@@ -17,16 +14,16 @@ class Application:
 
         self.window = Tk()
         self.window.title("MonOthello")
-        self.window.wm_maxsize(width="460", height="520")
-        self.window.wm_minsize(width="460", height="520")
+        self.window.wm_maxsize(width="460", height="540")
+        self.window.wm_minsize(width="460", height="540")
 
 
         self.game = False
-        self.show_valid_positions = False
-        self.difficulty = 0
-        self.mode = 1
-        self.color_first_player = "B"
-        self.heuristic = 2
+        self.show_valid_positions = 0
+        self.difficulty = 1
+        self.mode = 2
+        self.color_first_player = 3
+        self.heuristic = 4
         self.create_elements()
         self.update_status("Welcome to MonOthello!")
         self.window.mainloop()
@@ -72,7 +69,6 @@ class Application:
 
         settings.add_separator()
 
-
         first_player = Menu(settings, tearoff=0)
         mode = Menu(settings, tearoff=0)
         heuristic = Menu(settings, tearoff=0)
@@ -114,6 +110,11 @@ class Application:
         heuristic.add_radiobutton(label="Posicional", variable=self.heuristic, underline=0,
                                   command=lambda: self.set_heuristic(minimax.posicional),
                                   value=3)
+
+        heuristic.add_radiobutton(label="Marc Mandt Posicional", variable=self.heuristic, underline=0,
+                                  command=lambda: self.set_heuristic(minimax.marc_mandt_posicional),
+                                  value=4)
+
 
 
         settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
@@ -260,10 +261,16 @@ class Application:
     def computer_play(self):            
 
         minimax.PLAYER = self.game.turn.color
+        print '------------------------------'
+        print 'executing minimax with:'
+        print self.game.board
+        print self.game.turn.color
+        print '------------------------------'
         position = minimax.minimax(self.game.board, 
                                    self.difficulty, 
                                    self.game.turn.color, 
                                    self.heuristic)[1]
+        print 'minimax finished with choice: %s' % str(position)
         self.game.play(position)
         message = "%s's turn." % (self.game.turn.color)        
         self.update_status(message)
