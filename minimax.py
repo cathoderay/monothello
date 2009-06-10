@@ -25,7 +25,6 @@ def change_turn(turn):
 
 def minimax(board, depth, turn, heuristic):
     if depth == 0 or end_game(board):
-        value = heuristic(board, PLAYER)
         return (heuristic(board, PLAYER), None)
     else:
         movement = None
