@@ -17,7 +17,6 @@ class Application:
         self.window.wm_maxsize(width="460", height="540")
         self.window.wm_minsize(width="460", height="540")
 
-
         self.game = False
         self.show_valid_positions = 0
         self.difficulty = 1
@@ -74,7 +73,6 @@ class Application:
         heuristic = Menu(settings, tearoff=0)
         difficulty = Menu(settings, tearoff=0)
 
-
         settings.add_cascade(label="First Player", menu=first_player, underline=0)        
         first_player.add_radiobutton(label="Black", variable=self.color_first_player,
                                      command=lambda: self.set_first_player("B"),
@@ -83,8 +81,6 @@ class Application:
                                      command=lambda: self.set_first_player("W"),
                                      underline=0)
 
-
-
         settings.add_cascade(label="Mode", menu=mode, underline=0)
         mode.add_radiobutton(label="Human vs Human", variable=self.mode, 
                              command=lambda: self.set_mode(0), underline=0)
@@ -92,7 +88,6 @@ class Application:
                              command=lambda: self.set_mode(1), underline=1)
         mode.add_radiobutton(label="Computer vs Human", variable=self.mode, 
                              command=lambda: self.set_mode(2), underline=12)
-
 
         settings.add_cascade(label="Heuristic", menu=heuristic, underline=0)
         heuristic.add_radiobutton(label="Baby", variable=self.heuristic, underline=0, 
@@ -115,8 +110,6 @@ class Application:
                                   command=lambda: self.set_heuristic(minimax.marc_mandt_posicional),
                                   value=4)
 
-
-
         settings.add_cascade(label="Difficulty", menu=difficulty, underline=0)
         difficulty.add_radiobutton(label="Depth 1", 
                                    variable=self.difficulty,
@@ -135,13 +128,11 @@ class Application:
                                    command=lambda: self.set_difficulty(4),
                                    underline=6)
 
-
         #set the default values
         first_player.invoke(first_player.index("Black"))
         mode.invoke(mode.index("Human vs Computer"))
         difficulty.invoke(difficulty.index(1))
         heuristic.invoke(heuristic.index("Weak"))
-
 
     def set_mode(self, m):
         self.mode = m
@@ -150,7 +141,7 @@ class Application:
 
     def set_first_player(self, c):
         self.color_first_player = c
-        print 'First player changed to to:'
+        print 'First player changed to:'
         print self.color_first_player
 
     def set_difficulty(self, d):
@@ -190,7 +181,7 @@ class Application:
         self.status.pack(side=LEFT)
 
     def create_game(self):
-        """Instantiate a game from the engine module."""
+        """Instantiate a game from the game module."""
         message="Are you sure you want to restart?"
         if self.game and \
            not tkMessageBox.askyesno(title="New", message=message):
@@ -312,7 +303,7 @@ class Application:
         self.window.update_idletasks()
 
     def update_board(self):
-        """Update the pieces from the engine's board."""
+        """Update the pieces from the game's board."""
         for row in range(8):
             for column in range(8):
                 position = self.board[(row, column)]
@@ -333,8 +324,8 @@ class Application:
                 p["image"] = self.valid_image
                 p.update_idletasks()
                 
-
     def update_score(self):
+        """Update the scores of the players."""
         self.score["text"] = "%s(%s): %s | %s(%s): %s" % \
                              (self.game.player1.color,
                               self.game.player1.mode, 
@@ -345,6 +336,7 @@ class Application:
         self.score.update_idletasks()
 
     def update_pass_turn(self):
+        """Check if it's a pass situation and enable the Pass button."""
         self.pass_turn["state"] = DISABLED
         if not has_valid_position(self.game.board, self.game.turn.color):
             self.pass_turn["state"] = NORMAL

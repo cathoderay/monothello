@@ -2,6 +2,10 @@ from util import *
 
 
 class Game():
+    """Handle the main aspects of the game.
+    Store the players, the turn and the board state.
+    
+    """
     def __init__(self, p1_color="W", p1_mode="H", p2_mode="C"):
         if p1_color == "W":
             p2_color = "B"
@@ -19,6 +23,7 @@ class Game():
         self.update_scores()
     
     def play(self, position):
+        """Move a piece to the given position."""
         if is_valid_position(self.board, position, self.turn.color):
             move(self.board, position, self.turn.color)
             self.update_scores()
@@ -40,7 +45,7 @@ class Game():
             self.turn = self.player1
 
     def winning_side(self, formatted=True):
-        """Return a string with the winning side."""        
+        """Return a string with the winning side."""
         self.update_scores()
         if self.player1.score > self.player2.score:
             winning = self.player1.color
@@ -95,7 +100,7 @@ class Player():
 
 class Board(dict):
     def __init__(self):
-
+        """Initialization of the board with empty spaces."""
         for i in range(8):
             for j in range(8):
                 self[(i, j)] = "E"
