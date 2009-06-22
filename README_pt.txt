@@ -8,7 +8,7 @@
 1.0 Requisitos:
 ===============
 
-- Python 2.6.2
+- Python 2.5.* - 2.6.* (Recomendamos a versão 2.6.2)
 
 Se você utiliza o sistema operacional Windows, pule para a seção Windows.
 O download do interpretador Python pode ser feito através da URL:
