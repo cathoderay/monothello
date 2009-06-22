@@ -7,11 +7,9 @@ import minimax
 
 
 def play_game(game, heuristic1, heuristic2):
-    file = open('debug2', 'w+')
     while not end_game(game.board):
         turn = game.turn.color
         board = game.board
-        file.write("%s's turn:\n" % game.turn.color)
         if has_valid_position(board, turn):
             minimax.PLAYER = turn
             if turn == "B":
@@ -20,11 +18,8 @@ def play_game(game, heuristic1, heuristic2):
                 position = minimax.minimax(board, 1, turn, heuristic2)[1]
 
             game.play(position)
-            file.write(board.__str__())
-            file.write('\n')
         else:
             game.change_turn()
-    file.close()
     return game.winning_side(formatted=False)
 
 
