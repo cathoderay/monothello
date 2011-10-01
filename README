@@ -2,5 +2,5 @@ This was a game written in 2009, for my IA undergraduate course.
 
 In order to run:
  sudo apt-get install python-tk
- python monothello
+ python monothello.py
 
