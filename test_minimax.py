@@ -15,7 +15,7 @@ class TestWeak(unittest.TestCase):
         board[(1, 4)] = "W"        
         board[(1, 5)] = "W"
         board[(2, 4)] = "B"
-        self.assertEqual(minimax.weak(board), 6-1)
+        self.assertEqual(minimax.weak(board, minimax.PLAYER), 6-1)
 
     def test_configuration2(self):
         minimax.PLAYER = "B"
@@ -27,7 +27,7 @@ class TestWeak(unittest.TestCase):
         board[(1, 4)] = "W"        
         board[(1, 5)] = "W"
         board[(2, 4)] = "B"
-        self.assertEqual(minimax.weak(board), 1-6)     
+        self.assertEqual(minimax.weak(board, minimax.PLAYER), 1-6)     
 
 
 class TestPosicional(unittest.TestCase):
@@ -39,7 +39,7 @@ class TestPosicional(unittest.TestCase):
         board[(1, 1)] = "W" #value = 0
         board[(7, 7)] = "W" #value = 20
         board[(4, 3)] = "W" #value = 5
-        self.assertEqual(minimax.posicional(board), 45)
+        self.assertEqual(minimax.posicional(board, minimax.PLAYER), 45)
     
     def test_configuration2(self):
         minimax.PLAYER = "B"
@@ -49,7 +49,7 @@ class TestPosicional(unittest.TestCase):
         board[(1, 1)] = "B" #value = 0
         board[(7, 7)] = "B" #value = 20
         board[(4, 3)] = "B" #value = 5
-        self.assertEqual(minimax.posicional(board), 45)
+        self.assertEqual(minimax.posicional(board, minimax.PLAYER), 45)
         
     def test_configuration3(self):
         minimax.PLAYER = "W"
@@ -58,7 +58,7 @@ class TestPosicional(unittest.TestCase):
         board[(6, 4)] = "W" #value = 10
         board[(2, 4)] = "W" #value = 10
         board[(1, 4)] = "W" #value = 10
-        self.assertEqual(minimax.posicional(board), 40)
+        self.assertEqual(minimax.posicional(board, minimax.PLAYER), 40)
 
 
 if __name__ == "__main__":
